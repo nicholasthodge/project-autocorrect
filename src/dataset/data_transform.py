@@ -94,13 +94,23 @@ def create_data(read_file, write_file):
                             # Generate a misspelled version of the chosen word using the give_typo function
                             misspelled_word = give_typo(chosen_word)
 
-                            # Replace the chosen word with the misspelled one in the message
-                            misspelled_message = message.replace(chosen_word, misspelled_word, 1)
+                            # Check if the message ends with a comma or period and remove it
+                            ends_with_punctuation = message[-1] in [',', '.', '!', '?', '\'']
+                            punctuation = message[-1] if ends_with_punctuation else ''
+                            if ends_with_punctuation:
+                                message = message[:-1]  # Remove the punctuation
+
+                            # Replace the chosen word with the [MASK] token in the message
+                            new_message = message.replace(chosen_word, "[MASK]", 1)
+
+                            # Re-append the punctuation if it was removed
+                            if ends_with_punctuation:
+                                new_message += punctuation
 
                             # Write the result as a new row in the CSV
                             # includes context block ID, message ID, original message, misspelled word, and correct word
-                            csv_writer.writerow([block_idx + 1, message_idx + 1, misspelled_message, misspelled_word,
-                                                 chosen_word])
+                            csv_writer.writerow(
+                                [block_idx + 1, message_idx + 1, new_message, misspelled_word, chosen_word])
 
 
 # Driver
