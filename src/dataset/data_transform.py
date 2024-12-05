@@ -1,6 +1,7 @@
 import csv
 import random
 import re
+from src.autocorrect.keyboard_approach import chars_within_given_distance
 
 
 def remove_non_ascii(text):
@@ -13,6 +14,12 @@ def give_typo(given_word):
     error_count = random.randint(1, 3)  # Randomly decide how many errors (typos) to introduce
     # Keep track of indices that have already been modified to avoid multiple modifications to the same character
     modified_indices = set()
+
+    # We need to address only characters
+    for idx, char in enumerate(characters):
+        # If character is not a-z or A-Z
+        if not char.isalpha():
+            modified_indices.add(idx)  # Mark this index as 'modified' to not use it
 
     for _ in range(error_count):
         available_indices = [i for i in range(len(characters)) if
@@ -40,11 +47,8 @@ def give_typo(given_word):
 
         # Typo type: mistype (random character replacement)
         elif typo_type == 'mistype':
-            # First we need to make sure that the generated character is not the same character that was chosen
-            mistyped_char = chr(0)
-            while (mistyped_char != characters[index]) and (ord(mistyped_char) in range(97, 122)):
-                # Replace the character with a random letter within a keyboard distance of 1
-                mistyped_char = chr(random.randint(97, 122))
+            # Replace the character with a random letter within a keyboard distance of 1
+            mistyped_char = random.choice(chars_within_given_distance(characters[index], 1))
             characters[index] = mistyped_char
             modified_indices.add(index)  # Mark this index as modified
 
@@ -99,4 +103,5 @@ def create_data(read_file, write_file):
                                                  chosen_word])
 
 
-create_data("original_DailyDialog_train.txt", "train(OLD).csv")
+# Driver
+create_data("original_DailyDialog_train.txt", "train.csv")

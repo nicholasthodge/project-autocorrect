@@ -31,16 +31,16 @@ keyboard_cartesian = {
     'm': {'y': 2, 'x': 6},
 
     # Add the top row keys (optional)
-    '1': {'y': 3, 'x': 0},
-    '2': {'y': 3, 'x': 1},
-    '3': {'y': 3, 'x': 2},
-    '4': {'y': 3, 'x': 3},
-    '5': {'y': 3, 'x': 4},
-    '6': {'y': 3, 'x': 5},
-    '7': {'y': 3, 'x': 6},
-    '8': {'y': 3, 'x': 7},
-    '9': {'y': 3, 'x': 8},
-    '0': {'y': 3, 'x': 9},
+    # '1': {'y': 3, 'x': 0},
+    # '2': {'y': 3, 'x': 1},
+    # '3': {'y': 3, 'x': 2},
+    # '4': {'y': 3, 'x': 3},
+    # '5': {'y': 3, 'x': 4},
+    # '6': {'y': 3, 'x': 5},
+    # '7': {'y': 3, 'x': 6},
+    # '8': {'y': 3, 'x': 7},
+    # '9': {'y': 3, 'x': 8},
+    # '0': {'y': 3, 'x': 9},
 
     # Add special characters (optional)
     # You can define positions for symbols like #'-', '=', '[', ']', etc. based on your specific needs.
@@ -61,21 +61,22 @@ def keyboard_distance(char1, char2):
     char2_x = char2_coord['x']
 
     # Return (|x1-x2| + |y1+y2|)
-    return abs(char1_x - char2_x) + abs(char1_y - char2_y)
+    return max(abs(char1_x - char2_x), abs(char1_y - char2_y))
 
 
 # Function to return characters within a certain distance
-def chars_within_given_distance(char, distance):
-    if char not in keyboard_cartesian:
+def chars_within_given_distance(given_char, distance):
+    given_char = given_char.lower()
+    if given_char not in keyboard_cartesian:
         return ValueError("Given character not in list")
 
     nearby_chars = []
 
     for key, coord in keyboard_cartesian.items():
         # Check to make sure we don't have the original key
-        if key != char:
+        if key != given_char:
             # Calculate distance
-            key_distance = keyboard_distance(char, key)
+            key_distance = keyboard_distance(given_char, key)
 
             if key_distance <= distance:
                 nearby_chars.append(key)
@@ -83,5 +84,9 @@ def chars_within_given_distance(char, distance):
     return nearby_chars
 
 
-# Driver Area
-print(chars_within_given_distance('a', 1))
+# Example
+# alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+#             'v', 'w', 'x', 'y', 'z']
+#
+# for char in alphabet:
+#     print(f"{char}:  {(chars_within_given_distance(char, 1))}")
