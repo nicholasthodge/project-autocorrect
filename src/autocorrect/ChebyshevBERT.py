@@ -4,7 +4,7 @@ from scipy.spatial.distance import chebyshev
 
 
 # Initializes BERT pipeline
-fill_masker = pipeline(model="bert-base-uncased", task="fill-mask")
+fill_masker = pipeline(model = "google-bert/bert-base-uncased")
 
 # Calculates Chebyshev distance
 def chebyshev_distance(word1, word2):
