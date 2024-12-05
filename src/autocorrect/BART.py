@@ -1,3 +1,4 @@
+# Preliminary Testing - can ignore
 from transformers import AutoTokenizer, TFBartForConditionalGeneration
 tokenizer = AutoTokenizer.from_pretrained("veghar/spell_correct_bart_base")
 model = TFBartForConditionalGeneration.from_pretrained("veghar/spell_correct_bart_base")
@@ -10,5 +11,3 @@ corrected_sentences = tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
 print('Misspelled word:', text)
 print('Corrected word:', corrected_sentences)
-
-

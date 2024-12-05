@@ -11,7 +11,8 @@ def remove_non_ascii(text):
 def give_typo(given_word):
     characters = list(given_word)  # Convert the word to a list of characters
     error_count = random.randint(1, 3)  # Randomly decide how many errors (typos) to introduce
-    modified_indices = set()  # Keep track of indices that have already been modified to avoid multiple modifications to the same character
+    # Keep track of indices that have already been modified to avoid multiple modifications to the same character
+    modified_indices = set()
 
     for _ in range(error_count):
         available_indices = [i for i in range(len(characters)) if
@@ -39,7 +40,11 @@ def give_typo(given_word):
 
         # Typo type: mistype (random character replacement)
         elif typo_type == 'mistype':
-            mistyped_char = chr(random.randint(97, 122))  # Replace the character with a random letter from a-z
+            # First we need to make sure that the generated character is not the same character that was chosen
+            mistyped_char = chr(0)
+            while (mistyped_char != characters[index]) and (ord(mistyped_char) in range(97, 122)):
+                # Replace the character with a random letter within a keyboard distance of 1
+                mistyped_char = chr(random.randint(97, 122))
             characters[index] = mistyped_char
             modified_indices.add(index)  # Mark this index as modified
 
@@ -75,21 +80,23 @@ def create_data(read_file, write_file):
                         message = remove_non_ascii(message)
 
                         pattern = r"\s*([',.!?])"  # Regex pattern to remove spaces around punctuation marks
-                        message = re.sub(pattern, r"\1",
-                                         message)  # Clean up the message by removing unnecessary spaces around punctuation
+                        # Clean up the message by removing unnecessary spaces around punctuation
+                        message = re.sub(pattern, r"\1", message)
 
                         words = message.split()  # Split the message into words
                         if words:
                             chosen_word = random.choice(
                                 words)  # Randomly choose one word from the message to introduce a typo
-                            misspelled_word = give_typo(
-                                chosen_word)  # Generate a misspelled version of the chosen word using the give_typo function
+                            # Generate a misspelled version of the chosen word using the give_typo function
+                            misspelled_word = give_typo(chosen_word)
 
                             # Replace the chosen word with the misspelled one in the message
                             misspelled_message = message.replace(chosen_word, misspelled_word, 1)
 
-                            # Write the result as a new row in the CSV, including the context block ID, message ID, original message, misspelled word, and correct word
-                            csv_writer.writerow([block_idx + 1, message_idx + 1, misspelled_message, misspelled_word, chosen_word])
+                            # Write the result as a new row in the CSV
+                            # includes context block ID, message ID, original message, misspelled word, and correct word
+                            csv_writer.writerow([block_idx + 1, message_idx + 1, misspelled_message, misspelled_word,
+                                                 chosen_word])
 
 
-create_data("original_DailyDialog_train.txt", "train.csv")
+create_data("original_DailyDialog_train.txt", "train(OLD).csv")

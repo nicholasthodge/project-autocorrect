@@ -25,7 +25,7 @@ keyboard_cartesian = {
     'z': {'y': 2, 'x': 0},
     'x': {'y': 2, 'x': 1},
     'c': {'y': 2, 'x': 2},
-    'v': {'y': 2,  'x': 3},
+    'v': {'y': 2, 'x': 3},
     'b': {'y': 2, 'x': 4},
     'n': {'y': 2, 'x': 5},
     'm': {'y': 2, 'x': 6},
@@ -61,10 +61,27 @@ def keyboard_distance(char1, char2):
     char2_x = char2_coord['x']
 
     # Return (|x1-x2| + |y1+y2|)
-    return (abs(char1_x - char2_x) + abs(char1_y - char2_y))
+    return abs(char1_x - char2_x) + abs(char1_y - char2_y)
 
 
-# Driver area
+# Function to return characters within a certain distance
+def chars_within_given_distance(char, distance):
+    if char not in keyboard_cartesian:
+        return ValueError("Given character not in list")
 
-# Example
-print(keyboard_distance('q', 'm')) # Should print '8'
+    nearby_chars = []
+
+    for key, coord in keyboard_cartesian.items():
+        # Check to make sure we don't have the original key
+        if key != char:
+            # Calculate distance
+            key_distance = keyboard_distance(char, key)
+
+            if key_distance <= distance:
+                nearby_chars.append(key)
+
+    return nearby_chars
+
+
+# Driver Area
+print(chars_within_given_distance('a', 1))
