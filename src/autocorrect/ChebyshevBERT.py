@@ -2,9 +2,9 @@ import csv
 from transformers import pipeline
 from scipy.spatial.distance import chebyshev
 
-
 # Initializes BERT pipeline
-fill_masker = pipeline(model = "google-bert/bert-base-uncased")
+fill_masker = pipeline(model="google-bert/bert-base-uncased")
+
 
 # Calculates Chebyshev distance
 def chebyshev_distance(word1, word2):
@@ -21,47 +21,50 @@ def chebyshev_distance(word1, word2):
     return chebyshev(vec1, vec2)
 
 
-filename = ".../dataset/train.csv"  # Replace with the actual path to your file
+filename = "../dataset/train.csv"
 x_predictions = 5  # Number of top predictions to consider
+
+rows = []
 
 # Reads csv file
 with open(filename, 'r') as csvfile:
     csvreader = csv.reader(csvfile)
     header = next(csvreader)  # Skips the header
-
-    # Accuracy trackers
-    total_cases = 0
-    bert_alone_correct = 0
-    bert_chebyshev_correct = 0
-
-    # Processes each row
     for row in csvreader:
-        total_cases += 1
-        sentence = row[2]
-        misspelled_word = row[3]
-        correct_word = row[4]
+        rows.append(row)
 
-        # Gets BERT predictions
-        predictions = fill_masker(sentence, top_k=x_predictions)  # top_k gets specified number of predictions
-        predicted_words = [pred['token_str'] for pred in predictions]  # extracts predicted words
+# Accuracy trackers
+total_cases = 0
+bert_alone_correct = 0
+bert_chebyshev_correct = 0
 
-        # Takes standalone BERT's best guess
-        bert_alone_guess = predicted_words[0]
-        if bert_alone_guess == correct_word:
-            bert_alone_correct += 1
+# Processes each row
+for row in rows[:10000]:
+    total_cases += 1
+    sentence = row[2]
+    misspelled_word = row[3]
+    correct_word = row[4]
 
-        # Uses chebyshev distance to find BERT prediction with smallest distance
-        best_guess = None
-        min_distance = 10000
-        for predicted_word in predicted_words:
-            dist = chebyshev_distance(predicted_word, correct_word)
-            if dist < min_distance:
-                min_distance = dist
-                best_guess = predicted_word
+    # Gets BERT predictions
+    predictions = fill_masker(sentence, top_k=x_predictions)  # top_k gets specified number of predictions
+    predicted_words = [pred['token_str'] for pred in predictions]  # extracts predicted words
 
-        if best_guess == correct_word:
-            bert_chebyshev_correct += 1
+    # Takes standalone BERT's best guess
+    bert_alone_guess = predicted_words[0]
+    if bert_alone_guess == correct_word:
+        bert_alone_correct += 1
 
+    # Uses chebyshev distance to find BERT prediction with the smallest distance
+    best_guess = None
+    min_distance = 10000
+    for predicted_word in predicted_words:
+        dist = chebyshev_distance(predicted_word, correct_word)
+        if dist < min_distance:
+            min_distance = dist
+            best_guess = predicted_word
+
+    if best_guess == correct_word:
+        bert_chebyshev_correct += 1
 
 print("Total Cases:", total_cases)
 print(f"BERT Alone Accuracy: {bert_alone_correct / total_cases * 100:.2f}%")
