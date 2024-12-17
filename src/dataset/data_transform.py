@@ -57,6 +57,7 @@ def give_typo(given_word):
 
 
 # Function to process a file and create a CSV with context blocks and typo data
+# Function to process a file and create a CSV with context blocks and typo data
 def create_data(read_file, write_file):
     # Open the input file for reading
     with open(read_file, mode='r', encoding="utf8") as rf:
@@ -65,52 +66,51 @@ def create_data(read_file, write_file):
         "\n")  # Split the file content into context blocks, each block is separated by a newline
 
     # Open the output file for writing in CSV format
-    with open(write_file, mode='w'):
-        with open(write_file, 'w', newline='') as wf:
-            csv_writer = csv.writer(wf)  # Create a CSV writer object
-            # Write the header row in the CSV
-            csv_writer.writerow(
-                ['Context Block ID', 'Message ID', 'Misspelled Message', 'Misspelled Word', 'Correct Word'])
+    with open(write_file, 'w', newline='') as wf:
+        csv_writer = csv.writer(wf)  # Create a CSV writer object
+        # Write the header row in the CSV
+        csv_writer.writerow(
+            ['Context Block ID', 'Message ID', 'Misspelled Message', 'Misspelled Word', 'Correct Word'])
 
-            # Iterate over each context block
-            for block_idx, context_block in enumerate(context_blocks):
-                messages = context_block.split(
-                    "__eou__")  # Split each block into individual messages, separated by '__eou__'
+        # Iterate over each context block
+        for block_idx, context_block in enumerate(context_blocks):
+            messages = context_block.split(
+                "__eou__")  # Split each block into individual messages, separated by '__eou__'
 
-                # Iterate over each message in the block
-                for message_idx, message in enumerate(messages):
-                    if message:
-                        # Remove non-ASCII characters (there is lots of this in the original dataset)
-                        message = remove_non_ascii(message)
+            # Iterate over each message in the block
+            for message_idx, message in enumerate(messages):
+                if message:
+                    # Remove non-ASCII characters (there is lots of this in the original dataset)
+                    message = remove_non_ascii(message)
 
-                        pattern = r"\s*([',.!?])"  # Regex pattern to remove spaces around punctuation marks
-                        # Clean up the message by removing unnecessary spaces around punctuation
-                        message = re.sub(pattern, r"\1", message)
+                    pattern = r"\s*([',.!?])"  # Regex pattern to remove spaces around punctuation marks
+                    # Clean up the message by removing unnecessary spaces around punctuation
+                    message = re.sub(pattern, r"\1", message)
 
-                        words = message.split()  # Split the message into words
-                        if words:
-                            chosen_word = random.choice(
-                                words)  # Randomly choose one word from the message to introduce a typo
-                            # Generate a misspelled version of the chosen word using the give_typo function
-                            misspelled_word = give_typo(chosen_word)
+                    words = message.split()  # Split the message into words
+                    if words:
+                        # Extract punctuation from words
+                        word_with_punctuations = [(re.sub(r"[^\w]", "", word), re.findall(r"[^\w]", word))
+                                                  for word in words]
 
-                            # Check if the message ends with a comma or period and remove it
-                            ends_with_punctuation = message[-1] in [',', '.', '!', '?', '\'']
-                            punctuation = message[-1] if ends_with_punctuation else ''
-                            if ends_with_punctuation:
-                                message = message[:-1]  # Remove the punctuation
+                        # Randomly choose a word to introduce a typo
+                        chosen_idx = random.randint(0, len(word_with_punctuations) - 1)
+                        chosen_word, punctuation = word_with_punctuations[chosen_idx]
 
-                            # Replace the chosen word with the [MASK] token in the message
-                            new_message = message.replace(chosen_word, "[MASK]", 1)
+                        # Generate a misspelled version of the chosen word
+                        misspelled_word = give_typo(chosen_word)
 
-                            # Re-append the punctuation if it was removed
-                            if ends_with_punctuation:
-                                new_message += punctuation
+                        # Replace the chosen word in the message with the [MASK] token
+                        mask_word_with_punctuation = f"[MASK]{''.join(punctuation)}"
+                        words[chosen_idx] = mask_word_with_punctuation
 
-                            # Write the result as a new row in the CSV
-                            # includes context block ID, message ID, original message, misspelled word, and correct word
-                            csv_writer.writerow(
-                                [block_idx + 1, message_idx + 1, new_message, misspelled_word, chosen_word])
+                        # Reconstruct the new message
+                        new_message = ' '.join(words)
+
+                        # Write the result as a new row in the CSV
+                        # includes context block ID, message ID, original message, misspelled word, and correct word
+                        csv_writer.writerow(
+                            [block_idx + 1, message_idx + 1, new_message, misspelled_word, chosen_word])
 
 
 # Driver

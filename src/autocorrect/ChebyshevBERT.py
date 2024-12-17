@@ -39,7 +39,7 @@ bert_alone_correct = 0
 bert_chebyshev_correct = 0
 
 # Processes each row
-for row in rows[:10000]:
+for row in rows[:1000]:  # Change number here to match num of rows wanted
     total_cases += 1
     sentence = row[2]
     misspelled_word = row[3]
